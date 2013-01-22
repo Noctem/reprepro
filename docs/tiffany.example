@@ -58,7 +58,7 @@
 #############################################################################
 
 import sys, os, time
-import apt_pkg
+import hashlib
 
 ################################################################################
 
@@ -155,7 +155,7 @@ class Updates:
 def sizesha1(f):
     size = os.fstat(f.fileno())[6]
     f.seek(0)
-    sha1sum = apt_pkg.sha1sum(f)
+    sha1sum = hashlib.sha1(f.read()).hexdigest()
     return (sha1sum, size)
 
 def getsizesha1(name):
