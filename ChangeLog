@@ -1,3 +1,70 @@
+2012-12-31
+	* document byhandhook in manual.html
+
+2012-12-02
+	* add a reference to listfilter in the FilterFormula description
+
+2012-11-17
+	* improve some manpage descriptions about where ~/, +b/, +o/ and +c/ are allowed
+
+2012-11-10
+	* improve DownloadListsAs description in manpage
+
+2012-10-21
+	* fix wrong include type in termdecide.h
+
+2012-10-30
+	* repair bitrot of code used without libarchive
+
+2012-09-03
+	* fix overlong VerifyRelease example in manual.html
+
+2012-07-11
+	* fix bug in checking old unchanged {Packages/Sources}.bz2
+	  files for existance. (Triggering even an assertion when
+	  only .bz2 index files are requested).
+	* ignore diff comments about unterminated lines
+	  when parsing .diff files
+
+2012-06-24
+	* support http-method's extended 103 redirect status
+	* actually set REPREPRO_CONFIG_DIR in hooks as
+	  documented in manpage.
+	* document more environment variables in manpage
+
+2012-06-07
+	* fix bash and zsh completion to work with
+	  conf/distributions and conf/incoming directories.
+	* fix allocation error with more than 16 group
+	  members in allocation files.
+
+2012-05-30
+	* add support for -A, -C, -T to *update and *pull.
+
+2012-05-22
+	* try to get InRelease from remote repositories
+	  instead of Release (with fall-back of the old behaviour)
+	* new GetInRelease: to conf/updates, defaults to yes
+
+2012-05-21
+	* fix some errors when compiled without libgpgme
+
+2012-05-20
+	* normalize included package control information to
+	  always start with the Package: field (as some clients
+	  assume that).
+	* don't require md5sum to download binary or source packages
+	  in the remote index files (any known hash suffices)
+
+2012-05-19
+	* avoid some problem with gcc-4.7
+
+2012-04-24
+	* change Contents-* files generation default from
+	"allcompontents" to "percomponent compatsymlink".
+	(i.e. best for >= wheezy, only first component visible for
+	 <= squeeze)
+
 2012-04-04
 	* 'include' now only warns about section "unknown" instead of
 	rejecting it. add warnings to 'includedsc' and 'includedeb', too.

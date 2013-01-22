@@ -1,4 +1,4 @@
-.TH REPREPRO 1 "2012-03-26" "reprepro" REPREPRO
+.TH REPREPRO 1 "2012-12-02" "reprepro" REPREPRO
 .SH NAME
 reprepro \- produce, manage and sync a local repository of Debian packages
 .mso www.tmac
@@ -19,13 +19,11 @@ reprepro is a tool to manage a repository of Debian packages
 It stores files either being injected manually or
 downloaded from some other repository (partially) mirrored
 into a pool/ hierarchy.
-Managed packages and checksums of files are stored in a libdb4.3
-database (or libdb4.4 or libdb3, depending what reprepro was compiled with),
+Managed packages and checksums of files are stored in a
+Berkeley DB database file,
 so no database server is needed.
 Checking signatures of mirrored repositories and creating
 signatures of the generated Package indices is supported.
-
-.B WARNING: Some functions are still quite experimental and not very heavily tested. Be careful.
 
 Former working title of this program was mirrorer.
 .SH "GLOBAL OPTIONS"
@@ -935,7 +933,7 @@ using \fB\-A\fP to avoid breaking the other architectures for which the binary
 packages were still missing and now want to copy it to those architectures were
 they are unlikely to break something (because a newbinary is already available).
 .TP
-.B unusedsource \fR[\fP\fIdistributions\fP\fR]\fP
+.B unusedsources \fR[\fP\fIdistributions\fP\fR]\fP
 List all source packages for which no binary package build from them is found.
 .TP
 .B sourcemissing \fR[\fP\fIdistributions\fP\fR]\fP
@@ -1100,7 +1098,7 @@ while in other lines the # character and
 everything after it till the newline character are ignored.
 
 A paragraph can also consist of only a single field
-.RB \" !include: \"
+.RB \(dq !include: \(dq
 which causes the named file (relative to confdir unless starting
 with
 .BR ~/ ", " +b/ ", " +c/ " or " / " )"
@@ -1323,21 +1321,17 @@ per component is created.
 If there is a \fBallcomponents\fP then one global Contents\-\fIarch\fP
 file is generated.
 If both are given, both are created.
-If none of both is specified or implied,
-then some default is used which currently
-is \fBallcomponents\fP but will be switched to \fBpercomponent\fP
-some months before wheezy's freeze.
+If none of both is specified then \fBpercomponent\fP is taken
+as default (earlier versions had other defaults).
 
-If \fBcompatsymlink\fP or \fBnocompatsymlink\fP is specified
-then \fBpercomponent\fP is implied.
-Those are only possible if \fBallcomponents\fP if off and they
-control whether a compatiblity symlink is created (that allows
-version of apt\-file looking at the component independent filename
-to see at least the contents of the first component if no files
-containing information for all components are created).
+The switches \fBcompatsymlink\fP or \fBnocompatsymlink\fP
+(only possible if \fBallcomponents\fP was not specified explicitly)
+control whether a compatibility symlink is created so old versions
+of apt\-file looking for the component independent filenames at
+least see the contents of the first component.
 
-If \fBpercomponent\fP is given and \fBallcomponents\fP is not,
-then the \fBcompatsymlinks\fP is the default, but that will change
+Unless \fBallcomponents\fP is given, \fBcompatsymlinks\fP
+currently is the default, but that will change
 in some future (current estimate: after wheezy was released)
 
 .TP
@@ -1370,7 +1364,8 @@ while an empty one causes no \fBuContents\-\fP\fIarch\fP files to
 be generated.
 .TP
 .B Uploaders
-Specifies a file (relative to confdir if not starting with a slash)
+Specifies a file (relative to confdir if not starting with
+.BR ~/ ", " +b/ ", " +c/ " or " / " )"
 to specify who is allowed to upload packages. Without this there are no
 limits, and this file can be ignored via \fB\-\-ignore=uploaders\fP.
 See the section \fBUPLOADERS FILES\fP below.
@@ -1445,7 +1440,7 @@ at manual.html in reprepro's source or
 If the filename for the log files does not start with a slash,
 it is relative to the directory specified with \fB\-\-logdir\fP,
 the scripts are relative to \fB\-\-confdir\fP unless starting with
-a slash.
+.BR ~/ ", " +b/ ", " +c/ " or " / .
 .TP
 .B ValidFor
 If this field exists, an Valid\-Until field is put into generated
@@ -1579,11 +1574,23 @@ To allow revoked or expired keys, add a "\fB!\fP" behind a key.
 is also needed).
 To also allow subkeys of a specified key, add a "\fB+\fP" behind a key.
 .TP
-.B IgnoreRelease
+.B IgnoreRelease: yes
 If this is present, no
+.B InRelease
+or
 .B Release
 file will be downloaded and thus the md5sums of the other
 index files will not be checked.
+.TP
+.B GetInRelease: no
+IF this is present, no
+.B InRelease
+file is downloaded but only
+.B Release
+(and
+.B Release.gpg
+)
+are tried.
 .TP
 .B Flat
 If this field is in an update rule, it is supposed to be a
@@ -1625,13 +1632,17 @@ this source. The format is misusing the parser intended for
 Dependency lines. To get only architecture all packages use
 "architecture (== all)", to get only at least important
 packages use "priority (==required) | priority (==important)".
+
+See the description of the listfilter command for the semantics
+of formulas.
 .TP
 .B FilterList\fR, \fPFilterSrcList
 These take at least two arguments:
 The first one is the default action when something is not found in the list,
 then a list of filenames (relative to
 .B \-\-confdir\fR,
-if not starting with a slash),
+if not starting with
+.BR ~/ ", " +b/ ", " +c/ " or " / " )"
 in the format of dpkg \-\-get\-selections and only packages listed in
 there as
 .B install
@@ -1702,12 +1713,21 @@ ListShellHook: grep\-dctrl \-X \-S apt \-o \-X \-S dpkg || [ $? \-eq 1 ]
 will limit the update rule to packages from the specified source packages.
 .TP
 .B DownloadListsAs
-The arguments of this field, which much be elements of the
-form \fB.\fP, \fB.gz\fP, \fB.bz2\fP, \fB.lzma\fP, \fB.xz\fP and \fB.diff\fP
-specify in which order reprepro
-will look for a usable variant of needed index files
-in the downloaded Release file.
-(The default is \fB.diff .xz .lzma .bz2 .gz .\fP, i.e.
+The arguments of this field specify which index files reprepro
+will download.
+
+Allowed values are
+.BR . ", " .gz ", " .bz2 ", " .lzma ", " .xz ", " .lz ", " .diff ", "
+.BR force.gz ", " force.bz2 ", " force.lzma ", " force.xz ", "
+.BR force.lz ", and " force.diff "."
+
+Reprepro will try the first supported variant in the list given:
+Only compressions compiled in or for which an uncompressor was found
+are used.
+Unless the value starts with \fBforce.\fP,
+it is only tried if if is found in the Release or InRelease file.
+
+The default value is \fB.diff .xz .lzma .bz2 .gz .\fP, i.e.
 download Packages.diff if listed in the Release file,
 otherwise or if not usable download .xz if
 listed in the Release file and there is a way to uncompress it,
@@ -1715,14 +1735,15 @@ then .lzma if usable,
 then .bz2 if usable,
 then .gz and then uncompressed).
 
-Together with \fBIgnoreRelease\fP reprepro will download the first
-in this list that could be unpacked.
-
 Note there is no way to see if an uncompressed variant
 of the file is available (as the Release file always lists their
 checksums, even if not there),
 so putting '\fB.\fP' anywhere but as the last argument can mean
 trying to download a file that does not exist.
+
+Together with \fBIgnoreRelease\fP reprepro will download the first
+in this list that could be unpacked (i.e. \fBforce\fP is always assumed)
+and the default value is \fB.gz .bzip2 . .lzma .xz\fP.
 .SS conf/pulls
 This file contains the rules for pulling packages from one
 distribution to another.
@@ -2288,7 +2309,7 @@ tracking, put in some log directory when using processincoming, or given to
 an hook script (currently only possible with processincoming).
 .TP
 .B filekey
-the position relative to the mirrordir.  (as found as "Filename:" in Packages.gz)
+the position relative to the outdir.  (as found in "Filename:" in Packages.gz)
 .TP
 .B "full filename"
 the position relative to /
@@ -2389,6 +2410,38 @@ depending on how reprepro got it).
 This is not used, but only set in hook scripts called by reprepro
 to the \fBdists\fP directory (relative to the current directory or
 absolute, depending on how reprepro got it).
+.TP
+.B REPREPRO_LOG_DIR
+This is not used, but only set in hook scripts called by reprepro
+to the value setable by \fB\-\-logdir\fP.
+.TP
+.B REPREPRO_CAUSING_COMMAND
+.TP
+.B REPREPRO_CAUSING_FILE
+Those two environment variable are set (or unset) in
+\fBLog:\fP and \fBByHandHooks:\fP scripts and hint what command
+and what file caused the hook to be called (if there is some).
+.TP
+.B REPREPRO_CAUSING_RULE
+This environment variable is set (or unset) in
+\fBLog:\fP scripts and hint what update or pull rule caused
+this change.
+.TP
+.B REPREPRO_FROM
+This environment variable is set (or unset) in
+\fBLog:\fP scripts and denotes what other distribution a
+package is copied from (with pull and copy commands).
+.TP
+.B REPREPRO_FILTER_ARCHITECTURE
+.TP
+.B REPREPRO_FILTER_CODENAME
+.TP
+.B REPREPRO_FILTER_COMPONENT
+.TP
+.B REPREPRO_FILTER_PACKAGETYPE
+.TP
+.B REPREPRO_FILTER_PATTERN
+Set in \fBListFilterHook:\fP scripts.
 .TP
 .B GNUPGHOME
 Not used by reprepro directly.

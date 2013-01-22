@@ -24,7 +24,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <malloc.h>
 #include <string.h>
 #include <ctype.h>
 #include <fcntl.h>
@@ -525,17 +524,20 @@ void release_abortfile(struct filetorelease *file) {
 }
 
 bool release_oldexists(struct filetorelease *file) {
-	if (file->f[ic_uncompressed].fullfinalfilename != NULL) {
-		if (file->f[ic_gzip].fullfinalfilename != NULL) {
-			return isregularfile(file->f[ic_gzip].fullfinalfilename) &&
-			       isregularfile(file->f[ic_uncompressed].fullfinalfilename);
-		} else {
-			return isregularfile(file->f[ic_uncompressed].fullfinalfilename);
+	enum indexcompression ic;
+	bool hadanything = false;
+
+	for (ic = ic_uncompressed ; ic < ic_count ; ic++) {
+		char *f = file->f[ic].fullfinalfilename;
+
+		if (f != NULL) {
+			if (isregularfile(f))
+				hadanything = true;
+			else
+				return false;
 		}
-	} else {
-		assert (file->f[ic_gzip].fullfinalfilename != NULL);
-		return isregularfile(file->f[ic_gzip].fullfinalfilename);
 	}
+	return hadanything;
 }
 
 static retvalue openfile(const char *dirofdist, struct openfile *f) {

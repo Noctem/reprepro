@@ -1,3 +1,32 @@
+Updates between 4.12.4 and 4.12.5:
+- various documentation improvements
+- fix bitrot on non-libarchive code
+
+Updates between 4.12.3 and 4.12.4:
+- fix bug when only generating .bz2 indices
+- ignore diff comments about unterminated lines when parsing .diff files
+
+Updates between 4.12.2 and 4.12.3:
+- actually set REPREPRO_CONFIG_DIR in hooks as documented in manpage
+- support 103 redirect message from apt's http method.
+  (works best with apt >= 0.9.4)
+
+Updates between 4.12.1 and 4.12.2:
+- fix error with uploader files with more than 16 group members
+
+Updates between 4.12.0 and 4.12.1:
+- fix bash and zsh completion to work with config directories
+- add experimental -A, -C, -T support to the pull/update family of commands
+
+Updates between 4.11.0 and 4.12.0:
+- get InRelease from remote repositories (to disable use new GetInRelease: no)
+- always put Package field first in indices
+- support getting packages from remote repositories without md5sums.
+
+Updates between 4.10.0 and 4.11.0:
+- Contents files default location is now "percomponent compatsymlink".
+- unify handling of "unknown" section.
+
 Updates between 4.9.0 and 4.10.0:
 - allow "!include:" in conf/{distributions,updates,pulls,incoming}
 - conf/{distributions,updates,pulls,incoming} can be directories

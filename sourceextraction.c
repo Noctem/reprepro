@@ -19,7 +19,6 @@
 #include <assert.h>
 #include <limits.h>
 #include <stdlib.h>
-#include <malloc.h>
 #include <string.h>
 #include <stdio.h>
 #ifdef HAVE_LIBARCHIVE
@@ -32,6 +31,7 @@
 #include "chunks.h"
 #include "uncompression.h"
 #include "sourceextraction.h"
+#include "mprintf.h"
 
 struct sourceextraction {
 	bool failed, completed;
@@ -315,6 +315,13 @@ static retvalue parsediff(struct compressedfile *f, /*@null@*/char **section_p, 
 				return RET_OK;
 			}
 		}
+		if (memcmp(p, "\\ No newline at end of file", 27) == 0) {
+			if (!u_getline()) {
+				/* nothing found successfully */
+				*found_p = false;
+				return RET_OK;
+			}
+		}
 		if (memcmp(p, "diff ", 4) == 0) {
 			if (!u_getline()) {
 				/* strange file, but nothing explicitly wrong */
@@ -455,7 +462,8 @@ static retvalue read_source_control_file(struct sourceextraction *e, struct arch
 	// TODO: implement...
 	size_t size, len, controllen;
 	ssize_t got;
-	char *buffer, *aftercontrol;
+	char *buffer;
+	const char *aftercontrol;
 
 	size = archive_entry_size(entry);
 	if (size <= 0)
@@ -485,7 +493,7 @@ static retvalue read_source_control_file(struct sourceextraction *e, struct arch
 	buffer[len] = '\0';
 	// TODO: allow a saved .diff for this file applied here
 
-	controllen = chunk_extract(buffer, buffer, &aftercontrol);
+	controllen = chunk_extract(buffer, buffer, len, true, &aftercontrol);
 	if (controllen == 0) {
 		free(buffer);
 		return RET_NOTHING;

@@ -22,7 +22,6 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
-#include <malloc.h>
 #include "error.h"
 #include "mprintf.h"
 #include "strlist.h"
@@ -99,7 +98,7 @@ static inline retvalue filterlistfile_parse(struct filterlistfile *n, const char
 		lineno++;
 		lineend = strchr(line, '\n');
 		if (lineend == NULL) {
-			fprintf(stderr, "Overlong line in '%s'!\n", filename);
+			fprintf(stderr, "Overlong or unterminated line in '%s'!\n", filename);
 			return RET_ERROR;
 		}
 		while (lineend >= line && xisspace(*lineend))

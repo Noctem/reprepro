@@ -31,7 +31,6 @@
 #include <signal.h>
 #include <stdio.h>
 #include <time.h>
-#include <malloc.h>
 #include "error.h"
 #include "strlist.h"
 #include "atoms.h"
@@ -126,7 +125,7 @@ static retvalue logfile_open(struct logfile *logfile) {
 
 	(void)dirs_make_parent(logfile->filename);
 	logfile->fd = open(logfile->filename,
-			O_CREAT|O_APPEND|O_LARGEFILE|O_NOCTTY|O_WRONLY,
+			O_CREAT|O_APPEND|O_NOCTTY|O_WRONLY,
 			0666);
 	if (logfile->fd < 0) {
 		int e = errno;
@@ -624,6 +623,7 @@ static retvalue startchild(void) {
 		setenv("REPREPRO_BASE_DIR", global.basedir, true);
 		setenv("REPREPRO_OUT_DIR", global.outdir, true);
 		setenv("REPREPRO_CONF_DIR", global.confdir, true);
+		setenv("REPREPRO_CONFIG_DIR", global.confdir, true);
 		setenv("REPREPRO_DIST_DIR", global.distdir, true);
 		setenv("REPREPRO_LOG_DIR", global.logdir, true);
 		(void)execv(p->arguments[0], p->arguments);

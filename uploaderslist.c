@@ -23,7 +23,6 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
-#include <malloc.h>
 #include "error.h"
 #include "mprintf.h"
 #include "strlist.h"
@@ -1068,7 +1067,7 @@ static retvalue include_group(struct uploadergroup *group, const struct uploader
 	if (n == 0 || (n & 15) == 15) {
 		/* let's hope no static checker is confused here ;-> */
 		memberof = realloc(memberof,
-				((n+16)&~15) * sizeof(struct uploadergroup*));
+				((n+17)&~15) * sizeof(struct uploadergroup*));
 		if (FAILEDTOALLOC(memberof))
 			return RET_ERROR_OOM;
 		*memberof_p = memberof;

@@ -24,11 +24,11 @@
 #include <stdio.h>
 #include <getopt.h>
 #include <string.h>
-#include <malloc.h>
 #include "error.h"
 #include "filecntl.h"
 #include "readtextfile.h"
 #include "debfile.h"
+#include "chunks.h"
 
 #ifdef HAVE_LIBARCHIVE
 #error Why did this file got compiled instead of debfile.c?
@@ -128,16 +128,18 @@ static retvalue try_extractcontrol(char **control, const char *debfile, bool bro
 
 	/* read data: */
 	if (RET_IS_OK(result)) {
-		size_t len; char *afterchanges;
+		size_t len, controllen;
+		const char *afterchanges;
 
 		r = readtextfilefd(pipe2[0],
 				brokentar?
 "output from ar p <debfile> control.tar.gz | tar -XOzf - control":
 "output from ar p <debfile> control.tar.gz | tar -XOzf - ./control",
-				&controlchunk, NULL);
+				&controlchunk, &controllen);
 		if (RET_IS_OK(r)) {
-			len = chunk_extract(controlchunk, controlchunk,
-					&afterchanges);
+			len = chunk_extract(controlchunk,
+					controlchunk, controllen,
+					false, &afterchanges);
 			if (len == 0)
 				r = RET_NOTHING;
 			if (*afterchanges != '\0') {
