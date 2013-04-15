@@ -31,7 +31,6 @@
 #include "chunks.h"
 #include "uncompression.h"
 #include "sourceextraction.h"
-#include "mprintf.h"
 
 struct sourceextraction {
 	bool failed, completed;

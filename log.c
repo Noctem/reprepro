@@ -41,9 +41,6 @@
 #include "log.h"
 #include "filecntl.h"
 
-const char *causingfile = NULL;
-command_t causingcommand = atom_unknown;
-
 /*@null@*/ static /*@refcounted@*/ struct logfile {
 	/*@null@*/struct logfile *next;
 	char *filename;
@@ -229,7 +226,7 @@ static retvalue notificator_parse(struct notificator *n, struct configiterator *
 	retvalue r;
 	int c;
 
-	memset(n, 0, sizeof(struct notificator));
+	setzero(struct notificator, n);
 	n->architecture = atom_unknown;
 	n->component = atom_unknown;
 	n->packagetype = atom_unknown;
@@ -433,7 +430,6 @@ static retvalue notificator_parse(struct notificator *n, struct configiterator *
 	/*@null@*/char *causingfile;
 	/*@null@*/char *causingrule;
 	/*@null@*/char *suitefrom;
-	command_t causingcommand;
 	/* data to send to the process */
 	size_t datalen, datasent;
 	/*@null@*/char *data;
@@ -602,30 +598,8 @@ static retvalue startchild(void) {
 		}
 		/* Try to close all open fd but 0,1,2 */
 		closefrom(3);
-		if (p->causingfile != NULL)
-			setenv("REPREPRO_CAUSING_FILE", p->causingfile, true);
-		else
-			unsetenv("REPREPRO_CAUSING_FILE");
-		if (p->causingrule != NULL)
-			setenv("REPREPRO_CAUSING_RULE", p->causingrule, true);
-		else
-			unsetenv("REPREPRO_CAUSING_RULE");
-		if (p->suitefrom != NULL)
-			setenv("REPREPRO_FROM", p->suitefrom, true);
-		else
-			unsetenv("REPREPRO_FROM");
-		if (atom_defined(p->causingcommand))
-			setenv("REPREPRO_CAUSING_COMMAND",
-					atoms_commands[p->causingcommand],
-					true);
-		else
-			unsetenv("REPREPRO_CAUSING_COMMAND");
-		setenv("REPREPRO_BASE_DIR", global.basedir, true);
-		setenv("REPREPRO_OUT_DIR", global.outdir, true);
-		setenv("REPREPRO_CONF_DIR", global.confdir, true);
-		setenv("REPREPRO_CONFIG_DIR", global.confdir, true);
-		setenv("REPREPRO_DIST_DIR", global.distdir, true);
-		setenv("REPREPRO_LOG_DIR", global.logdir, true);
+		sethookenvironment(p->causingfile, p->causingrule,
+				p->suitefrom, NULL);
 		(void)execv(p->arguments[0], p->arguments);
 		fprintf(stderr, "Error executing '%s': %s\n", p->arguments[0],
 				strerror(errno));
@@ -750,7 +724,6 @@ static retvalue notificator_enqueuechanges(struct notificator *n, const char *co
 		free(arguments);
 		return RET_ERROR_OOM;
 	}
-	p->causingcommand = causingcommand;
 	if (causingfile != NULL) {
 		p->causingfile = strdup(causingfile);
 		if (FAILEDTOALLOC(p->causingfile)) {
@@ -890,7 +863,6 @@ static retvalue notificator_enqueue(struct notificator *n, struct target *target
 		free(arguments);
 		return RET_ERROR_OOM;
 	}
-	p->causingcommand = causingcommand;
 	if (causingfile != NULL) {
 		size_t j;
 		p->causingfile = strdup(causingfile);

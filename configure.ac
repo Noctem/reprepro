@@ -2,14 +2,14 @@ dnl
 dnl Process this file with autoconf to produce a configure script
 dnl
 
-AC_INIT(reprepro, 4.12.5, brlink@debian.org)
+AC_INIT(reprepro, 4.13.0, brlink@debian.org)
 AC_CONFIG_SRCDIR(main.c)
 AC_CONFIG_AUX_DIR(ac)
 AM_INIT_AUTOMAKE([-Wall -Werror -Wno-portability])
-AC_CONFIG_HEADER(config.h)
+AM_CONFIG_HEADER(config.h)
 
 if test "${CFLAGS+set}" != set ; then
-	CFLAGS="-Wall -O2 -g -Wmissing-prototypes -Wstrict-prototypes -Wshadow -fnested-functions"
+	CFLAGS="-Wall -O2 -g -Wmissing-prototypes -Wstrict-prototypes -Wshadow"
 fi
 
 AM_MAINTAINER_MODE

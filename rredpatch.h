@@ -1,11 +1,6 @@
 #ifndef REPREPRO_RREDPATCH_H
 #define REPREPRO_RREDPATCH_H
 
-#include "config.h"
-#ifndef HAVE_GETLINE
-ssize_t getline (char **lineptr, size_t *n, FILE *stream);
-#endif
-
 struct rred_patch;
 struct modification;
 

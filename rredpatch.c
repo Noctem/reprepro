@@ -742,14 +742,9 @@ retvalue modification_addstuff(const char *source, struct modification **patch_p
 		return RET_ERRNO(e);
 	}
 	do {
-	#ifndef HAVE_GETLINE
-		line = fgetln(i, &bufsize);
-		got = strlen(line);
-	#else	
 		got = getline(&line, &bufsize, i);
-	#endif
-	  } while (got >= 0 && lineno-- > 0);
-		if (got < 0) {
+	} while (got >= 0 && lineno-- > 0);
+	if (got < 0) {
 		int e = errno;
 
 		/* You should have made sure the old file is not empty */

@@ -20,7 +20,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <sys/types.h>
 #include <stdlib.h>
 
 #include "error.h"
@@ -30,7 +29,6 @@
 #include "database_p.h"
 #include "files.h"
 #include "sizes.h"
-#include "mprintf.h"
 
 struct distribution_sizes {
 	struct distribution_sizes *next;

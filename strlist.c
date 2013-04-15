@@ -168,8 +168,7 @@ retvalue strlist_include(struct strlist *strlist, char *element) {
 		}
 		strlist->values = v;
 	}
-	memmove(strlist->values+1, strlist->values,
-			strlist->count*sizeof(char *));
+	arrayinsert(char *, strlist->values, 0, strlist->count);
 	strlist->count++;
 	strlist->values[0] = element;
 	return RET_OK;
