@@ -22,9 +22,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#ifdef __APPLE__
-#include <sys/types.h>
-#endif
 #include "error.h"
 #include "mprintf.h"
 #include "chunks.h"
@@ -36,6 +33,9 @@
 #include "files.h"
 #include "ignore.h"
 #include "configparser.h"
+#ifdef __APPLE__
+#include <sys/types.h>
+#endif
 
 /* options are zerroed when called, when error is returned contentsopions_done
  * is called by the caller */
@@ -175,14 +175,14 @@ static retvalue gentargetcontents(struct target *target, struct release *release
 	char *contentsfilename;
 	struct filetorelease *file;
 	struct filelist_list *contents;
-	struct target_cursor iterator IFSTUPIDCC(=TARGET_CURSOR_ZERO);
+	struct target_cursor iterator;
 
 	if (onlyneeded && target->saved_wasmodified)
 		onlyneeded = false;
 
-	contentsfilename = mprintf("%s/%sContents-%s",
+	contentsfilename = mprintf("%s/Contents%s-%s",
 			atoms_components[target->component],
-			(target->packagetype == pt_udeb)?"s":"",
+			(target->packagetype == pt_udeb)?"-udeb":"",
 			atoms_architectures[target->architecture]);
 	if (FAILEDTOALLOC(contentsfilename))
 		return RET_ERROR_OOM;
