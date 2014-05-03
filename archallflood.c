@@ -20,7 +20,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <sys/types.h>
 
 #include "error.h"
 #include "strlist.h"
@@ -669,7 +668,7 @@ static retvalue floodlist_install(struct floodlist *list, struct logger *logger,
 					logger, pkg->name, pkg->new_version,
 					pkg->new_control, &pkg->new_filekeys,
 					false, td, architecture_all,
-					NULL, NULL);
+					NULL, NULL, NULL);
 			RET_UPDATE(result, r);
 			if (RET_WAS_ERROR(r))
 				break;

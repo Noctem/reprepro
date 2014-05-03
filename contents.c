@@ -33,6 +33,7 @@
 #include "files.h"
 #include "ignore.h"
 #include "configparser.h"
+
 #ifdef __APPLE__
 #include <sys/types.h>
 #endif
